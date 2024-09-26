@@ -13,7 +13,8 @@ type MongoConfig struct {
 
 type ElasticsearchConfig struct {
 	ES_HOST        string
-	ES_PORT        string
+	ES_USERNAME    string
+	ES_PASSWORD    string
 	INDEX_NAME     string
 	INDEX_PREFIX   string
 }
@@ -34,12 +35,13 @@ func GetMongoConfig() *MongoConfig{
 
 
 // Get ES config method
-func getEsConfig() *ElasticsearchConfig{
+func GetEsConfig() *ElasticsearchConfig{
 
 	fmt.Println("Fetching ES Configs....")
 	config := &ElasticsearchConfig{
 		ES_HOST:      os.Getenv("ES_HOST"),
-		ES_PORT:      os.Getenv("ES_PORT"),
+		ES_USERNAME:  os.Getenv("ES_USERNAME"),
+		ES_PASSWORD:  os.Getenv("ES_PASSWORD"),
 		INDEX_NAME:   os.Getenv("ES_INDEX_NAME"),
 		INDEX_PREFIX: os.Getenv("ES_INDEX_PREFIX"),
 	}
