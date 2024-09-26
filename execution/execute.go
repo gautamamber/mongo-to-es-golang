@@ -13,8 +13,7 @@ func DumpDataMongoToES(collectionName string, ch chan<- string, wg *sync.WaitGro
 	defer wg.Done()
 
 	// Get Mongo data from specific mongo collection
-	mongoDocument, _ := utils.GetMongoDocuments(collectionName)
-	fmt.Println(mongoDocument)
+	utils.GetMongoDocuments(collectionName)
 	// Dump in ES
 
 	// Return to channel

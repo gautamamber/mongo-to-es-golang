@@ -34,6 +34,7 @@ import (
 	"github.com/gautamamber/mongo-to-es-golang/settings"
 	"github.com/gautamamber/mongo-to-es-golang/connection"
 	"github.com/gautamamber/mongo-to-es-golang/execution"
+	"github.com/gautamamber/mongo-to-es-golang/utils"
 
 )
 
@@ -54,6 +55,9 @@ func init() {
 	if err != nil {
 		log.Fatal("Error Connecting ES:", err.Error())
 	}
+	// Create Index and mapping
+
+	utils.CreateIndexAndMapping()
 }
 
 func main() {
