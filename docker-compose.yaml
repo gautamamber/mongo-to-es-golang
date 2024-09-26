@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  # MongoDB 7 Service
+  mongo7:
+    image: mongo:7
+    container_name: mongo7
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - mongo_elasticsearch_network
+
+  # Elasticsearch 7 Service
+  elasticsearch7:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    container_name: elasticsearch7
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=password
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - mongo_elasticsearch_network
+
+volumes:
+  mongo_data:
+  es_data:
+
+networks:
+  mongo_elasticsearch_network:
+    driver: bridge
