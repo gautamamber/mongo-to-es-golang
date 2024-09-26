@@ -29,18 +29,12 @@ import (
 	"context"
 	"fmt"
 	"log"
-	// "time"
+	"sync"
+
 	"github.com/gautamamber/mongo-to-es-golang/settings"
 	"github.com/gautamamber/mongo-to-es-golang/connection"
-	// "github.com/gautamamber/mongo-to-es-golang/utils"
+	"github.com/gautamamber/mongo-to-es-golang/execution"
 
-
-	// "go.mongodb.org/mongo-driver/bson"
-	// "go.mongodb.org/mongo-driver/mongo"
-	// "go.mongodb.org/mongo-driver/mongo/options"
-	// "go.mongodb.org/mongo-driver/mongo/readpref"
-	// "github.com/elastic/go-elasticsearch/v7"
-	// "github.com/elastic/go-elasticsearch/v7/esapi"
 )
 
 func init() {
@@ -55,11 +49,11 @@ func init() {
 		log.Fatal("Error Connecting Mongo:", err.Error())
 	}
 
-	// // Initialize ES client
-	// err = connection.InitElasticSearch(ctx)
-	// if err != nil {
-	// 	log.Fatal("Error Connecting ES:", err.Error())
-	// }
+	// Initialize ES client
+	err = connection.InitElasticSearch(ctx)
+	if err != nil {
+		log.Fatal("Error Connecting ES:", err.Error())
+	}
 }
 
 func main() {
@@ -70,5 +64,29 @@ func main() {
 	// Get List of All existing collections
 	collections := settings.GetListOfStrings()
 
-	fmt.Println(collections)
+	// Create channel for communication
+
+	ch := make(chan string)
+
+	// Create a wait group to wait for all goroutine to finish
+	var wg sync.WaitGroup
+	
+	for _, collection := range collections {
+		// Increment the wait group counter before launching go routine
+		wg.Add(1)
+		go execution.DumpDataMongoToES(collection, ch, &wg)
+	}
+
+	// Launch a go routine to close channel once all the collections are processed
+	go func() {
+		wg.Wait()
+		close(ch)
+	}()
+	// Print message from channel
+	for msg := range ch {
+		fmt.Println("Message in Channel respone" + msg)
+	}
+
+	fmt.Println("Script Executed Successfully!")
+
 }
