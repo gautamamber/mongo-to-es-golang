@@ -2,7 +2,6 @@ package config
 
 import (
 	"os"
-	"fmt"
 )
 type MongoConfig struct {
 	MONGO_HOST    string
@@ -22,8 +21,6 @@ type ElasticsearchConfig struct {
 // Get Mongo config method
 func GetMongoConfig() *MongoConfig{
 
-	fmt.Println("Fetching Mongo Configs....")
-
 	config := &MongoConfig{
 		MONGO_HOST:    os.Getenv("MONGO_HOST"),
 		MONGO_PORT:    os.Getenv("MONGO_PORT"),
@@ -37,7 +34,6 @@ func GetMongoConfig() *MongoConfig{
 // Get ES config method
 func GetEsConfig() *ElasticsearchConfig{
 
-	fmt.Println("Fetching ES Configs....")
 	config := &ElasticsearchConfig{
 		ES_HOST:      os.Getenv("ES_HOST"),
 		ES_USERNAME:  os.Getenv("ES_USERNAME"),

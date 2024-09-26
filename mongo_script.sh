@@ -15,8 +15,9 @@ generate_mongo_script() {
     echo "db.createCollection('$collection');" >> mongo_script.js
     echo "for (let i = 0; i < 100; i++) {" >> mongo_script.js
     echo "  db.$collection.insertOne({" >> mongo_script.js
+    echo "    ID: 'ID:' + i," >> mongo_script.js
     echo "    name: 'Name' + i," >> mongo_script.js
-    echo "    value: Math.floor(Math.random() * 1000)," >> mongo_script.js
+    echo "    value: 'Value' + Math.floor(Math.random() * 1000)," >> mongo_script.js
     echo "    createdAt: new Date()" >> mongo_script.js
     echo "  });" >> mongo_script.js
     echo "}" >> mongo_script.js

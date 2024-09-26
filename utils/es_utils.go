@@ -3,8 +3,10 @@ package utils
 import (
 	"fmt"
 	"log"
+	"encoding/json"
 	"context"
 	"strings"
+	"bytes"
 
 	"github.com/gautamamber/mongo-to-es-golang/config"
 	"github.com/gautamamber/mongo-to-es-golang/connection"
@@ -12,6 +14,12 @@ import (
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 )
 
+// Document structure with only relevant fields
+type Document struct {
+	DocType string  `json:"doc_type"`
+	Name    string  `json:"name"`
+	Value   string `json:"value"`
+}
 
 func CreateIndexAndMapping() {
 
@@ -57,7 +65,7 @@ func CreateIndexAndMapping() {
 					"type": "text"
 				},
 				"value": {
-					"type": "float"
+					"type": "string"
 				}
 			}
 		}
@@ -77,4 +85,64 @@ func CreateIndexAndMapping() {
 
 	fmt.Printf("Index '%s' created.\n", indexName)
 
+}
+
+func BulkDocumentAdd(documents []map[string]interface{}, collectionName string) error {
+
+	esConfig := config.GetEsConfig()
+	
+	indexName := esConfig.INDEX_PREFIX + "_" + esConfig.INDEX_NAME
+
+	var buf bytes.Buffer 
+
+	// Prepare the bulk request
+
+	for _, doc := range documents {
+
+		// Extract only the needed fields
+		name, okName := doc["name"].(string)
+		value, okValue := doc["value"].(string)
+
+		// Skip the document if any of the required fields are missing
+		if !okName || !okValue {
+			continue
+		}
+
+		// Create a new Document with only the necessary fields
+		esDoc := Document{
+			DocType: collectionName,
+			Name:    name,
+			Value:   value,
+		}
+		meta := map[string]interface{}{
+			"index": map[string]interface{}{
+				"_index": indexName,
+			},
+		}
+		// Write metadata to buffer
+		if err := json.NewEncoder(&buf).Encode(meta); err != nil {
+			return fmt.Errorf("failed to encode metadata: %w", err)
+		}
+		// Write the actual document to buffer
+		if err := json.NewEncoder(&buf).Encode(esDoc); err != nil {
+			return fmt.Errorf("failed to encode document: %w", err)
+		}
+	}
+	req := esapi.BulkRequest{
+		Body: &buf,
+		Refresh: "true", // Make the documents available for search immediately
+	}
+
+	// Execute the bulk request
+	res, err := req.Do(context.Background(), connection.ElasticsearchClient)
+	if err != nil {
+		return fmt.Errorf("failed to execute bulk request: %w", err)
+	}
+	defer res.Body.Close()
+	if res.IsError() {
+		return fmt.Errorf("error indexing documents: %s", res.String())
+	}
+
+	fmt.Println("Documents indexed successfully.")
+	return nil
 }

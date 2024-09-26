@@ -2,10 +2,28 @@ package execution
 
 import (
 	"sync"
-	"fmt"
+	"log"
 
 	"github.com/gautamamber/mongo-to-es-golang/utils"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+// Convert primitive mongo map
+func convertPrimitiveMToMap(documents []primitive.M) []map[string]interface{} {
+	var convertedDocuments []map[string]interface{}
+
+	for _, doc := range documents {
+		// Convert primitive.M to map[string]interface{}
+		convertedDoc := make(map[string]interface{})
+		for k, v := range doc {
+			convertedDoc[k] = v
+		}
+		convertedDocuments = append(convertedDocuments, convertedDoc)
+	}
+
+	return convertedDocuments
+}
+
 
 func DumpDataMongoToES(collectionName string, ch chan<- string, wg *sync.WaitGroup) {
 
@@ -13,14 +31,11 @@ func DumpDataMongoToES(collectionName string, ch chan<- string, wg *sync.WaitGro
 	defer wg.Done()
 
 	// Get Mongo data from specific mongo collection
-	utils.GetMongoDocuments(collectionName)
-	// Dump in ES
-
-	// Return to channel
-
-	data := "Data from " + collectionName
-
-	fmt.Println(data)
-	ch <- collectionName + "Dump successfully"
-
+	mongoDocuments, _ := utils.GetMongoDocuments(collectionName)
+	convertedDocuments := convertPrimitiveMToMap(mongoDocuments)
+	// Iterate in MongoDocument and Dump
+	if err := utils.BulkDocumentAdd(convertedDocuments, collectionName); err != nil {
+		log.Fatal("Error bulk indexing document")
+	}
+	ch <- collectionName + " - Dump successfully"
 }
