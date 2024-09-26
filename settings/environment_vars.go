@@ -2,10 +2,9 @@ package settings
 
 import (
 	"log"
-	
+
 	"github.com/joho/godotenv"
 )
-
 
 func InitEnvironmnetVars() {
 	err := godotenv.Load(".env")

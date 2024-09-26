@@ -6,13 +6,13 @@ import (
 
 	"github.com/gautamamber/mongo-to-es-golang/config"
 
-	"github.com/elastic/go-elasticsearch/v7"
+	elasticsearch "github.com/elastic/go-elasticsearch/v7"
 )
 
-// var (
-// 	// Global ES connection
-// 	ElasticsearchClient *elasticsearch.Client
-// )
+var (
+	// Global ES connection
+	ElasticsearchClient *elasticsearch.Client
+)
 
 func InitElasticSearch(ctx context.Context) error {
 	var err error
@@ -26,14 +26,14 @@ func InitElasticSearch(ctx context.Context) error {
         Username: esConfig.ES_USERNAME,
         Password: esConfig.ES_PASSWORD,
     })
-	
+
 	if err != nil {
 		log.Fatalf("Error creating Elasticsearch client: %s", err)
 		panic(err)
 	}
 
 	// Check if client is working by pinging ES
-	res, err := ElasticsearchClient.info()
+	res, err := ElasticsearchClient.Info()
 	if err != nil {
 		log.Fatalf("Error getting Elasticsearch info: %s", err)
 	}

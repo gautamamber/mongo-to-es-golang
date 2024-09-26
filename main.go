@@ -55,11 +55,11 @@ func init() {
 		log.Fatal("Error Connecting Mongo:", err.Error())
 	}
 
-	// Initialize ES client
-	err := connection.InitElasticSearch(ctx)
-	if err != nil {
-		log.Fatal("Error Connecting ES:", err.Error())
-	}
+	// // Initialize ES client
+	// err = connection.InitElasticSearch(ctx)
+	// if err != nil {
+	// 	log.Fatal("Error Connecting ES:", err.Error())
+	// }
 }
 
 func main() {
@@ -67,4 +67,8 @@ func main() {
 
 	fmt.Println("Script Execution begins...")
 
+	// Get List of All existing collections
+	collections := settings.GetListOfStrings()
+
+	fmt.Println(collections)
 }
